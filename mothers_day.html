@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>母亲节快乐</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(150deg, #fff0f5 0%, #ffe4f0 50%, #ffd6e8 100%);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── 飘落花瓣 ── */
+    .petal {
+      position: fixed; top: -20px;
+      border-radius: 50%;
+      background: #ffb3cc;
+      opacity: 0.6;
+      animation: fall linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes fall {
+      0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0.6; }
+      50%  { transform: translateY(48vh) rotate(180deg) translateX(22px); opacity: 0.5; }
+      100% { transform: translateY(105vh) rotate(360deg) translateX(-12px); opacity: 0; }
+    }
+
+    /* ── 信封遮罩层 ── */
+    .env-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(150deg, #fff0f5 0%, #ffe4f0 50%, #ffd6e8 100%);
+      transition: opacity 0.9s ease;
+    }
+    .env-overlay.gone { opacity: 0; pointer-events: none; }
+
+    /* ── 信封 ── */
+    .env-wrap {
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .env {
+      position: relative; width: min(320px, 85vw);
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      perspective: 900px; user-select: none;
+    }
+
+    .e-back {
+      width: 100%; padding-top: 71.43%; position: relative;
+    }
+    .e-back svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .e-letter {
+      position: absolute; top: 27%; left: 7%; width: 86%;
+      height: 0; background: #fffafc; border-radius: 4px; z-index: 2;
+      transition: height .9s cubic-bezier(.4,0,.2,1) .1s,
+                  top .9s cubic-bezier(.4,0,.2,1) .1s;
+    }
+
+    .e-front {
+      position: absolute; top: 27%; left: 0; width: 100%; z-index: 3;
+      transition: opacity .5s ease .6s;
+    }
+    .e-front svg { width: 100%; display: block; }
+
+    /* ── 爱心（信封上）── */
+    .e-heart {
+      position: absolute; bottom: 14%; left: 50%;
+      transform: translateX(-50%); z-index: 4;
+      transition: transform .3s ease, opacity .5s ease .6s;
+    }
+    .env:active .e-heart { transform: translateX(-50%) scale(1.2); }
+
+    .e-flap {
+      position: absolute; top: 0; left: 0; width: 100%; z-index: 5;
+      transform-origin: top center;
+      transition: transform .9s cubic-bezier(.4,0,.2,1);
+    }
+    .e-flap svg { width: 100%; display: block; }
+
+    .env.open .e-flap   { transform: rotateX(180deg); z-index: 1; }
+    .env.open .e-letter  { height: 175%; top: -110%; }
+    .env.open .e-front,
+    .env.open .e-heart   { opacity: 0; }
+
+    /* 点击提示 */
+    .hint {
+      margin-top: 14px; font-size: 14px;
+      color: #d06898; letter-spacing: 3px;
+      animation: breathe 1.8s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: .4; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── 纯 SVG 小星星（提示文字里）── */
+    .hint-star { display: inline-block; vertical-align: middle; margin-left: 4px; }
+
+    /* ── 主内容 ── */
+    .main { opacity: 0; transform: translateY(28px); transition: all .9s ease; pointer-events: none; }
+    .main.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+    .card {
+      position: relative; z-index: 1;
+      max-width: 560px; margin: 24px auto 48px;
+      padding: 40px 28px 36px;
+      background: rgba(255,255,255,.92);
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(230,90,140,.14);
+      text-align: center; backdrop-filter: blur(6px);
+    }
+
+    .deco-circle {
+      position: absolute; border-radius: 50%;
+      background: #ff9ec8; opacity: .12; pointer-events: none;
+    }
+    .d1 { width: 140px; height: 140px; top: -60px; right: -40px; }
+    .d2 { width: 80px;  height: 80px;  bottom: 20px; left: -20px;  }
+
+    /* 花束（纯 SVG）*/
+    .bouquet { display: block; margin-bottom: 10px; animation: bob 2.2s ease-in-out infinite; }
+    .bouquet svg { width: 72px; height: 72px; }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    h1 { font-size: clamp(26px,7vw,36px); font-weight: 700; color: #e0325e; letter-spacing: 5px; margin-bottom: 6px; }
+    .subtitle { font-size: clamp(13px,3.5vw,16px); color: #e07098; letter-spacing: 2px; margin-bottom: 20px; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 0 auto 22px; }
+    .divider::before, .divider::after {
+      content: ""; flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, #f5c0d8, transparent);
+    }
+    /* 樱花（纯 SVG）*/
+    .deco-svg { display: block; }
+
+    .msg {
+      font-size: clamp(14px,3.8vw,16px); line-height: 2;
+      color: #c06080; padding: 18px 20px;
+      background: linear-gradient(135deg,#fff5f8,#ffe9f2);
+      border-radius: 14px; border: 1px solid #f5c0d0;
+      margin-bottom: 24px; text-align: left;
+    }
+    .msg strong { color: #d04880; }
+
+    /* 跳动爱心行 */
+    .hearts { display: flex; justify-content: center; gap: 12px; animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.12); }
+    }
+
+    /* 署名 */
+    .sign { margin-top: 18px; font-size: clamp(12px,3.2vw,14px); color: #d080a0; letter-spacing: 1px; }
+
+    /* 署名里的小花 */
+    .sign-flower { display: inline-block; vertical-align: middle; margin-left: 6px; }
+
+    @media (max-width: 480px) {
+      .card { margin: 16px 10px 32px; padding: 30px 18px 26px; border-radius: 20px; }
+      .bouquet svg { width: 58px; height: 58px; }
+      .msg { padding: 14px 16px; line-height: 1.9; }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+(function spawnPetals() {
+  var cols = ["#ffb3cc","#f5a0c0","#ff9ec0","#f8c0d8","#ffcad8","#ffd8e8"];
+  for (var i = 0; i < 18; i++) {
+    var p = document.createElement("div"); p.className = "petal";
+    p.style.left = (Math.random()*100) + "vw";
+    p.style.background = cols[i % cols.length];
+    p.style.width  = (8 + Math.random()*10) + "px";
+    p.style.height = p.style.width;
+    p.style.animationDuration = (5 + Math.random()*8) + "s";
+    p.style.animationDelay     = (Math.random()*8) + "s";
+    document.body.appendChild(p);
+  }
+})();
+</script>
+
+<!-- 信封 -->
+<div class="env-overlay" id="overlay">
+  <div class="env-wrap">
+    <div class="env" id="env" role="button" tabindex="0" aria-label="点击打开信封">
+      <div class="e-back">
+        <svg viewBox="0 0 320 228" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="228" rx="10" fill="#f7a0be"/>
+        </svg>
+      </div>
+      <div class="e-letter" id="eLetter"></div>
+      <div class="e-front">
+        <svg viewBox="0 0 320 162" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gL" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f8ccdc"/>
+              <stop offset="100%" stop-color="#f0aac8"/>
+            </linearGradient>
+            <linearGradient id="gR" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f8ccdc"/>
+              <stop offset="100%" stop-color="#f0aac8"/>
+            </linearGradient>
+          </defs>
+          <polygon points="0,0 160,116 0,162" fill="url(#gL)"/>
+          <polygon points="320,0 160,116 320,162" fill="url(#gR)"/>
+        </svg>
+      </div>
+      <!-- SVG 爱心 -->
+      <div class="e-heart">
+        <svg width="34" height="31" viewBox="0 0 34 31" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 28 C5 20 0 14 0 8 C0 3 4 0 8.5 0 C12 0 15 2.5 17 6 C19 2.5 22 0 25.5 0 C30 0 34 3 34 8 C34 14 29 20 17 28Z" fill="#f04880"/>
+        </svg>
+      </div>
+      <div class="e-flap">
+        <svg viewBox="0 0 320 228" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffe0f0"/>
+              <stop offset="100%" stop-color="#f4a8c8"/>
+            </linearGradient>
+          </defs>
+          <polygon points="0,0 160,162 320,0" fill="url(#gF)"/>
+          <line x1="0" y1="162" x2="320" y2="162" stroke="#f8c0dc" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+    <p class="hint">
+      点击打开
+      <!-- 纯 SVG 星星 -->
+      <svg class="hint-star" width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="#f04880"/>
+      </svg>
+    </p>
+  </div>
+</div>
+
+<!-- 主内容 -->
+<div class="main" id="main">
+  <div class="card">
+    <div class="deco-circle d1"></div>
+    <div class="deco-circle d2"></div>
+
+    <!-- 纯 SVG 花束（无绿色） -->
+    <span class="bouquet">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <!-- 粉色茎 -->
+        <path d="M32 64 L32 36" stroke="#d06080" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M32 50 Q24 44 20 38" stroke="#d06080" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M32 46 Q40 40 44 34" stroke="#d06080" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <!-- 装饰叶（粉色系） -->
+        <ellipse cx="20" cy="36" rx="5" ry="3" fill="#f0a0c0" transform="rotate(-30 20 36)"/>
+        <ellipse cx="44" cy="32" rx="5" ry="3" fill="#f0a0c0" transform="rotate(30 44 32)"/>
+        <!-- 花朵1 -->
+        <circle cx="32" cy="22" r="5" fill="#f04880"/>
+        <circle cx="32" cy="22" r="2.5" fill="#ffc0d8"/>
+        <!-- 花朵2 -->
+        <circle cx="22" cy="30" r="4" fill="#e03070"/>
+        <circle cx="22" cy="30" r="2" fill="#ffaacc"/>
+        <!-- 花朵3 -->
+        <circle cx="42" cy="28" r="4" fill="#f07098"/>
+        <circle cx="42" cy="28" r="2" fill="#ffd0e4"/>
+        <!-- 小花苞 -->
+        <circle cx="32" cy="12" r="3" fill="#ff88b0"/>
+        <circle cx="32" cy="12" r="1.5" fill="#ffe0ee"/>
+      </svg>
+    </span>
+
+    <h1>母亲节快乐</h1>
+    <p class="subtitle">Happy Mother's Day</p>
+
+    <div class="divider">
+      <!-- 纯 SVG 樱花 -->
+      <svg class="deco-svg" width="18" height="18" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="16" cy="9"  rx="5" ry="8" fill="#ffb0c8" transform="rotate(0   16 16)"/>
+        <ellipse cx="16" cy="9"  rx="5" ry="8" fill="#ffb0c8" transform="rotate(72  16 16)"/>
+        <ellipse cx="16" cy="9"  rx="5" ry="8" fill="#ffb0c8" transform="rotate(144 16 16)"/>
+        <ellipse cx="16" cy="9"  rx="5" ry="8" fill="#ffb0c8" transform="rotate(216 16 16)"/>
+        <ellipse cx="16" cy="9"  rx="5" ry="8" fill="#ffb0c8" transform="rotate(288 16 16)"/>
+        <circle cx="16" cy="16" r="4" fill="#ffd0e4"/>
+      </svg>
+    </div>
+
+    <div class="msg">
+      <span style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+        亲爱的妈妈<strong>马春</strong>
+        <!-- SVG 星星 -->
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="#f04880"/>
+        </svg>
+      </span>
+      <strong>1984 年</strong>的春风，温柔了岁月，也迎来了最美的你。<br><br>
+      谢谢你用半生温柔，为我遮风挡雨，撑起一方晴空；<br>
+      把所有偏爱与无私都给了我，成为我成长路上最踏实的靠山。<br><br>
+      何其有幸，此生有您。<br>
+      祝我最爱的妈妈母亲节快乐！<br><br>
+      愿往后余生，健康常伴，平安顺遂，<br>
+      永远眉眼带笑，被时光温柔以待
+      <!-- SVG 郁金香 -->
+      <svg style="display:inline-block;vertical-align:middle;margin-left:4px;" width="18" height="18" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="16" cy="8" rx="7" ry="11" fill="#f04880" transform="rotate(-8 16 16)"/>
+        <ellipse cx="16" cy="8" rx="7" ry="11" fill="#f07098" transform="rotate(8 16 16)"/>
+        <ellipse cx="16" cy="8" rx="5" ry="9"  fill="#ffaacc"/>
+        <rect x="15" y="20" width="2" height="12" rx="1" fill="#d06080"/>
+      </svg>
+    </div>
+
+    <!-- SVG 跳动爱心行 -->
+    <div class="hearts">
+      <svg width="22" height="20" viewBox="0 0 22 20" xmlns="http://www.w3.org/2000/svg"><path d="M11 18 C4 12.5 0 9 0 5.5 C0 2.5 2.5 0 5.5 0 C7.5 0 9.5 1.5 11 4 C12.5 1.5 14.5 0 16.5 0 C19.5 0 22 2.5 22 5.5 C22 9 18 12.5 11 18Z" fill="#f04880"/></svg>
+      <svg width="22" height="20" viewBox="0 0 22 20" xmlns="http://www.w3.org/2000/svg"><path d="M11 18 C4 12.5 0 9 0 5.5 C0 2.5 2.5 0 5.5 0 C7.5 0 9.5 1.5 11 4 C12.5 1.5 14.5 0 16.5 0 C19.5 0 22 2.5 22 5.5 C22 9 18 12.5 11 18Z" fill="#f07098"/></svg>
+      <svg width="22" height="20" viewBox="0 0 22 20" xmlns="http://www.w3.org/2000/svg"><path d="M11 18 C4 12.5 0 9 0 5.5 C0 2.5 2.5 0 5.5 0 C7.5 0 9.5 1.5 11 4 C12.5 1.5 14.5 0 16.5 0 C19.5 0 22 2.5 22 5.5 C22 9 18 12.5 11 18Z" fill="#f04880"/></svg>
+      <svg width="22" height="20" viewBox="0 0 22 20" xmlns="http://www.w3.org/2000/svg"><path d="M11 18 C4 12.5 0 9 0 5.5 C0 2.5 2.5 0 5.5 0 C7.5 0 9.5 1.5 11 4 C12.5 1.5 14.5 0 16.5 0 C19.5 0 22 2.5 22 5.5 C22 9 18 12.5 11 18Z" fill="#f07098"/></svg>
+      <svg width="22" height="20" viewBox="0 0 22 20" xmlns="http://www.w3.org/2000/svg"><path d="M11 18 C4 12.5 0 9 0 5.5 C0 2.5 2.5 0 5.5 0 C7.5 0 9.5 1.5 11 4 C12.5 1.5 14.5 0 16.5 0 C19.5 0 22 2.5 22 5.5 C22 9 18 12.5 11 18Z" fill="#f04880"/></svg>
+    </div>
+
+    <p class="sign">
+      — 您最爱的孩子，永远爱您
+      <!-- 纯 SVG 小花 -->
+      <svg class="sign-flower" width="14" height="14" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="8"  r="5" fill="#f07098" transform="rotate(0   16 16)"/>
+        <circle cx="16" cy="8"  r="5" fill="#f07098" transform="rotate(120 16 16)"/>
+        <circle cx="16" cy="8"  r="5" fill="#f07098" transform="rotate(240 16 16)"/>
+        <circle cx="16" cy="16" r="3" fill="#ffd0e4"/>
+      </svg>
+    </p>
+  </div>
+</div>
+
+<script>
+var opened = false;
+function openEnv() {
+  if (opened) return; opened = true;
+  document.getElementById("env").classList.add("open");
+  setTimeout(function() {
+    document.getElementById("overlay").classList.add("gone");
+    document.getElementById("main").classList.add("show");
+  }, 1600);
+  setTimeout(function() { document.getElementById("overlay").style.display = "none"; }, 2700);
+}
+document.getElementById("env").addEventListener("click", openEnv);
+document.getElementById("env").addEventListener("touchstart", function(e) { e.preventDefault(); openEnv(); }, { passive: false });
+document.getElementById("env").addEventListener("keydown", function(e) { if (e.key==="Enter"||e.key===" ") openEnv(); });
+</script>
+</body>
+</html>
